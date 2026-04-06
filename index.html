@@ -440,7 +440,7 @@
     if (navigator.vibrate) navigator.vibrate([80, 50, 80]);
   }
 
-  // Tap timer → reset (ignore while buzzing or paused)
+  // tap reset
   timerEl.addEventListener('click', () => {
     if (buzzing || paused) return;
     clearInterval(intervalId);
@@ -451,10 +451,10 @@
     beginCountdown();
   });
 
-  // Spacebar → reset (only during active timer)
+  // space
   document.addEventListener('keydown', e => {
-    if (e.code !== 'Space') return;
-    if (timerEl.style.display === 'none') return;
+    if (e.code !== 'Space' && e.key !== ' ') return;
+    if (!totalSeconds) return;
     if (buzzing || paused) return;
     e.preventDefault();
     if (document.activeElement) document.activeElement.blur();
@@ -468,7 +468,7 @@
 
   inputEl.focus();
 
-  // PWA service worker
+  // PWA
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
