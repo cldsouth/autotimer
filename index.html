@@ -388,6 +388,7 @@
     setupEl.style.display = 'none';
     timerEl.style.display = 'flex';
     menuBtn.style.display = 'block';
+    document.activeElement && document.activeElement.blur();
     beginCountdown();
   }
 
@@ -456,6 +457,7 @@
     if (timerEl.style.display === 'none') return;
     if (buzzing || paused) return;
     e.preventDefault();
+    if (document.activeElement) document.activeElement.blur();
     clearInterval(intervalId);
     clockEl.classList.remove('buzz', 'reset');
     void clockEl.offsetWidth;
