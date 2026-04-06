@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Timer">
+<link rel="manifest" href="manifest.json">
+<title>Timer</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Courier New', Courier, monospace;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    overflow: hidden;
+  }
+
+  /* ── SETUP SCREEN ── */
+  #setup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+  }
+
+  #setup-label {
+    color: #555;
+    font-size: clamp(12px, 2.5vw, 16px);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+
+  #time-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: clamp(60px, 18vw, 160px);
+    letter-spacing: 0.05em;
+    width: 6ch;
+    text-align: center;
+    caret-color: #fff;
+  }
+
+  #format-hint {
+    color: #3a3a3a;
+    font-size: clamp(11px, 2vw, 14px);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  #start-btn {
+    background: transparent;
+    border: 1px solid #fff;
+    color: #fff;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: clamp(13px, 2.5vw, 16px);
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    padding: 14px 52px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.12s, color 0.12s;
+  }
+  #start-btn:hover, #start-btn:active {
+    background: #fff;
+    color: #000;
+  }
+
+  /* ── TIMER SCREEN ── */
+  #timer {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    inset: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #clock {
+    color: #fff;
+    font-size: clamp(72px, 22vw, 200px);
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+
+  @keyframes buzzblink {
+    0%   { color: #fff; }
+    40%  { color: #ff5500; }
+    100% { color: #fff; }
+  }
+  #clock.buzz {
+    animation: buzzblink 0.5s ease-out 1;
+  }
+
+  @keyframes resetflash {
+    0%   { color: #fff; }
+    40%  { color: #88ccff; }
+    100% { color: #fff; }
+  }
+  #clock.reset {
+    animation: resetflash 0.4s ease-out 1;
+  }
+
+  #colon {
+    display: inline-block;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.1; }
+  }
+
+  #timer-hint {
+    color: #2a2a2a;
+    font-size: clamp(11px, 2vw, 13px);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-top: 28px;
+  }
+
+  /* ── CORNER MENU BUTTON ── */
+  #menu-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: transparent;
+    border: 1px solid #333;
+    color: #444;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    cursor: pointer;
+    z-index: 100;
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  #menu-btn:hover, #menu-btn:active {
+    border-color: #888;
+    color: #aaa;
+  }
+
+  /* ── MENU OVERLAY ── */
+  #menu-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    z-index: 200;
+  }
+  #menu-overlay.open { display: flex; }
+
+  #menu-title {
+    color: #444;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+  }
+
+  #menu-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: clamp(60px, 18vw, 160px);
+    letter-spacing: 0.05em;
+    width: 6ch;
+    text-align: center;
+    caret-color: #fff;
+  }
+
+  #menu-hint {
+    color: #3a3a3a;
+    font-size: clamp(11px, 2vw, 13px);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .menu-row {
+    display: flex;
+    gap: 16px;
+  }
+
+  .menu-action {
+    background: transparent;
+    border: 1px solid #fff;
+    color: #fff;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: clamp(12px, 2vw, 14px);
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    padding: 12px 32px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.12s, color 0.12s;
+  }
+  .menu-action:hover, .menu-action:active {
+    background: #fff;
+    color: #000;
+  }
+  .menu-action.secondary {
+    border-color: #444;
+    color: #555;
+  }
+  .menu-action.secondary:hover, .menu-action.secondary:active {
+    background: #444;
+    color: #fff;
+  }
+
+  /* scanlines */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.07) 2px,
+      rgba(0,0,0,0.07) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="setup">
+  <div id="setup-label">Duration</div>
+  <input id="time-input" type="text" inputmode="numeric" maxlength="6"
+         placeholder="0000" autocomplete="off" spellcheck="false" />
+  <div id="format-hint">mm&nbsp;ss &nbsp;·&nbsp; hh&nbsp;mm&nbsp;ss</div>
+  <button id="start-btn">Start</button>
+</div>
+
+<!-- TIMER -->
+<div id="timer">
+  <div id="clock">
+    <span id="h"      style="display:none"></span>
+    <span id="hcolon" style="display:none">:</span>
+    <span id="m">00</span>
+    <span id="colon">:</span>
+    <span id="s">00</span>
+  </div>
+  <div id="timer-hint">tap to reset</div>
+</div>
+
+<!-- CORNER BUTTON (visible during timer) -->
+<button id="menu-btn" style="display:none">⋯</button>
+
+<!-- MENU OVERLAY -->
+<div id="menu-overlay">
+  <div id="menu-title">Duration</div>
+  <input id="menu-input" type="text" inputmode="numeric" maxlength="6"
+         placeholder="0000" autocomplete="off" spellcheck="false" />
+  <div id="menu-hint">mm&nbsp;ss &nbsp;·&nbsp; hh&nbsp;mm&nbsp;ss</div>
+  <div class="menu-row">
+    <button class="menu-action" id="menu-resume">Resume</button>
+    <button class="menu-action" id="menu-apply">Apply</button>
+  </div>
+  <button class="menu-action secondary" id="menu-cancel">Cancel</button>
+</div>
+
+<script>
+  const setupEl  = document.getElementById('setup');
+  const timerEl  = document.getElementById('timer');
+  const inputEl  = document.getElementById('time-input');
+  const startBtn = document.getElementById('start-btn');
+  const clockEl  = document.getElementById('clock');
+  const hEl      = document.getElementById('h');
+  const hColon   = document.getElementById('hcolon');
+  const mEl      = document.getElementById('m');
+  const sEl      = document.getElementById('s');
+
+  const menuBtn     = document.getElementById('menu-btn');
+  const menuOverlay = document.getElementById('menu-overlay');
+  const menuInput   = document.getElementById('menu-input');
+  const menuResume  = document.getElementById('menu-resume');
+  const menuApply   = document.getElementById('menu-apply');
+  const menuCancel  = document.getElementById('menu-cancel');
+
+  let paused = false;
+
+  function openMenu() {
+    paused = true;
+    clearInterval(intervalId);
+    menuInput.value = '';
+    menuOverlay.classList.add('open');
+    // Show Resume only if mid-run, not at full time
+    menuResume.style.display = (remaining < totalSeconds) ? 'block' : 'none';
+    setTimeout(() => menuInput.focus(), 50);
+  }
+
+  function closeMenu(resume) {
+    menuOverlay.classList.remove('open');
+    paused = false;
+    if (resume) {
+      // restart interval from where we left off
+      intervalId = setInterval(tick, 1000);
+    }
+  }
+
+  menuBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    openMenu();
+  });
+
+  menuResume.addEventListener('click', e => {
+    e.stopPropagation();
+    closeMenu(true);
+  });
+
+  menuApply.addEventListener('click', e => {
+    e.stopPropagation();
+    const secs = parseInput(menuInput.value);
+    if (secs <= 0) { menuInput.focus(); return; }
+    totalSeconds = secs;
+    closeMenu(false);
+    beginCountdown();
+  });
+
+  menuCancel.addEventListener('click', e => {
+    e.stopPropagation();
+    closeMenu(true);
+  });
+
+  menuInput.addEventListener('input', () => {
+    menuInput.value = menuInput.value.replace(/\D/g, '').slice(0, 6);
+  });
+  menuInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') menuApply.click();
+    if (e.key === 'Escape') menuCancel.click();
+  });
+  let remaining    = 0;
+  let intervalId   = null;
+  let buzzing      = false;
+
+  // Only allow digits
+  inputEl.addEventListener('input', () => {
+    inputEl.value = inputEl.value.replace(/\D/g, '').slice(0, 6);
+  });
+  inputEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter') launch();
+  });
+  startBtn.addEventListener('click', launch);
+
+  function parseInput(raw) {
+    const d = raw.replace(/\D/g, '');
+    if (!d || Number(d) === 0) return 0;
+    if (d.length <= 2) return parseInt(d, 10);                          // SS
+    if (d.length <= 4) {
+      return parseInt(d.slice(0, d.length - 2), 10) * 60
+           + parseInt(d.slice(-2), 10);                                 // MM SS
+    }
+    return parseInt(d.slice(0, d.length - 4), 10) * 3600
+         + parseInt(d.slice(d.length - 4, d.length - 2), 10) * 60
+         + parseInt(d.slice(-2), 10);                                   // HH MM SS
+  }
+
+  function launch() {
+    const secs = parseInput(inputEl.value);
+    if (secs <= 0) { inputEl.focus(); return; }
+    totalSeconds = secs;
+    setupEl.style.display = 'none';
+    timerEl.style.display = 'flex';
+    menuBtn.style.display = 'block';
+    beginCountdown();
+  }
+
+  function beginCountdown() {
+    remaining = totalSeconds;
+    updateDisplay();
+    clearInterval(intervalId);
+    intervalId = setInterval(tick, 1000);
+  }
+
+  function tick() {
+    if (buzzing) return;
+    remaining--;
+    updateDisplay();
+    if (remaining <= 0) onExpire();
+  }
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function updateDisplay() {
+    const h = Math.floor(remaining / 3600);
+    const m = Math.floor((remaining % 3600) / 60);
+    const s = remaining % 60;
+    if (h > 0) {
+      hEl.style.display    = 'inline';
+      hColon.style.display = 'inline';
+      hEl.textContent = pad(h);
+    } else {
+      hEl.style.display    = 'none';
+      hColon.style.display = 'none';
+    }
+    mEl.textContent = pad(m);
+    sEl.textContent = pad(s);
+  }
+
+  function onExpire() {
+    clearInterval(intervalId);
+    buzzing = true;
+    beepAndVibrate();
+    clockEl.classList.add('buzz');
+    setTimeout(() => {
+      clockEl.classList.remove('buzz');
+      buzzing = false;
+      beginCountdown();
+    }, 700);
+  }
+
+  function beepAndVibrate() {
+    if (navigator.vibrate) navigator.vibrate([80, 50, 80]);
+  }
+
+  // Tap timer → reset (ignore while buzzing or paused)
+  timerEl.addEventListener('click', () => {
+    if (buzzing || paused) return;
+    clearInterval(intervalId);
+    clockEl.classList.remove('buzz', 'reset');
+    void clockEl.offsetWidth; // force reflow to restart animation
+    clockEl.classList.add('reset');
+    setTimeout(() => clockEl.classList.remove('reset'), 400);
+    beginCountdown();
+  });
+
+  // Spacebar → reset (only during active timer)
+  document.addEventListener('keydown', e => {
+    if (e.code !== 'Space') return;
+    if (timerEl.style.display === 'none') return;
+    if (buzzing || paused) return;
+    e.preventDefault();
+    clearInterval(intervalId);
+    clockEl.classList.remove('buzz', 'reset');
+    void clockEl.offsetWidth;
+    clockEl.classList.add('reset');
+    setTimeout(() => clockEl.classList.remove('reset'), 400);
+    beginCountdown();
+  });
+
+  inputEl.focus();
+
+  // PWA service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+</script>
+</body>
+</html>
