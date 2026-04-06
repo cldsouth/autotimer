@@ -1,5 +1,6 @@
 # Timer
 
+https://cldsouth.github.io/autotimer
 Minimal countdown timer. Runs in the browser, installable as a PWA.
 
 ## Usage
