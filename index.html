@@ -440,7 +440,7 @@
     if (navigator.vibrate) navigator.vibrate([80, 50, 80]);
   }
 
-  // tap reset
+  // Tap reset
   timerEl.addEventListener('click', () => {
     if (buzzing || paused) return;
     clearInterval(intervalId);
@@ -451,7 +451,7 @@
     beginCountdown();
   });
 
-  // space
+  // Spacebar
   document.addEventListener('keydown', e => {
     if (e.code !== 'Space' && e.key !== ' ') return;
     if (!totalSeconds) return;
@@ -472,6 +472,21 @@
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
+
+  // Wake Lock
+  let wakeLock = null;
+  async function requestWakeLock() {
+    try {
+      if ('wakeLock' in navigator) {
+        wakeLock = await navigator.wakeLock.request('screen');
+      }
+    } catch(e) {}
+  }
+  // Sayfa tekrar görünür olunca (örn. tab değiştirince) yeniden iste
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') requestWakeLock();
+  });
+  requestWakeLock();
 </script>
 </body>
 </html>
