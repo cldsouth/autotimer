@@ -1,0 +1,19 @@
+{
+  "name": "autotimer",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Minimal countdown timer (PWA + Capacitor native package scaffold)",
+  "scripts": {
+    "cap:sync": "npx cap sync",
+    "cap:open:android": "npx cap open android",
+    "cap:open:ios": "npx cap open ios",
+    "native:android": "npx cap sync android && npx cap open android",
+    "native:ios": "npx cap sync ios && npx cap open ios"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/ios": "^7.0.0"
+  }
+}
