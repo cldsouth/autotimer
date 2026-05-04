@@ -1,0 +1,9 @@
+{
+  "appId": "com.cldsouth.autotimer",
+  "appName": "AutoTimer",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "server": {
+    "cleartext": true
+  }
+}

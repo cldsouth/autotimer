@@ -21,3 +21,21 @@ Open the URL in Chrome or Brave → install icon in the address bar → runs ful
 | `index.html` | App |
 | `manifest.json` | PWA config |
 | `sw.js` | Service worker (offline support) |
+
+## Android / iOS paketi (Capacitor)
+
+Bu repo, mobil paketleme için Capacitor yapılandırmasını içerir.
+
+```bash
+npm install
+npx cap add android
+npx cap add ios
+npx cap sync
+```
+
+Açmak için:
+
+```bash
+npx cap open android
+npx cap open ios
+```
