@@ -1,6 +1,6 @@
 # AutoTimer
 
-[**Live Web Version (PWA)**](https://cldsouth.github.io/autotimer)
+[**Live Web Version (PWA)**](https://cldsouth.github.io/autotimer/assets/)
 
 Minimal countdown timer. Runs in the browser, installable as a PWA, and available as a native Android app.
 
