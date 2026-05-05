@@ -18,28 +18,28 @@ android {
     }
     signingConfigs {
         release {
-            def keystoreFile = project.hasProperty('MYAPP_RELEASE_STORE_FILE') ? MYAPP_RELEASE_STORE_FILE : null
-            def keystorePassword = project.hasProperty('MYAPP_RELEASE_STORE_PASSWORD') ? MYAPP_RELEASE_STORE_PASSWORD : null
-            def keyAlias = project.hasProperty('MYAPP_RELEASE_KEY_ALIAS') ? MYAPP_RELEASE_KEY_ALIAS : null
-            def keyPassword = project.hasProperty('MYAPP_RELEASE_KEY_PASSWORD') ? MYAPP_RELEASE_KEY_PASSWORD : null
+            def kFile = project.hasProperty('MYAPP_RELEASE_STORE_FILE') ? MYAPP_RELEASE_STORE_FILE : null
+            def kStorePassword = project.hasProperty('MYAPP_RELEASE_STORE_PASSWORD') ? MYAPP_RELEASE_STORE_PASSWORD : null
+            def kKeyAlias = project.hasProperty('MYAPP_RELEASE_KEY_ALIAS') ? MYAPP_RELEASE_KEY_ALIAS : null
+            def kKeyPassword = project.hasProperty('MYAPP_RELEASE_KEY_PASSWORD') ? MYAPP_RELEASE_KEY_PASSWORD : null
 
-            if (keystoreFile == null) {
+            if (kFile == null) {
                 def localProperties = new Properties()
                 def localPropertiesFile = rootProject.file('local.properties')
                 if (localPropertiesFile.exists()) {
                     localPropertiesFile.withInputStream { localProperties.load(it) }
-                    keystoreFile = localProperties.getProperty('MYAPP_RELEASE_STORE_FILE')
-                    keystorePassword = localProperties.getProperty('MYAPP_RELEASE_STORE_PASSWORD')
-                    keyAlias = localProperties.getProperty('MYAPP_RELEASE_KEY_ALIAS')
-                    keyPassword = localProperties.getProperty('MYAPP_RELEASE_KEY_PASSWORD')
+                    kFile = localProperties.getProperty('MYAPP_RELEASE_STORE_FILE')
+                    kStorePassword = localProperties.getProperty('MYAPP_RELEASE_STORE_PASSWORD')
+                    kKeyAlias = localProperties.getProperty('MYAPP_RELEASE_KEY_ALIAS')
+                    kKeyPassword = localProperties.getProperty('MYAPP_RELEASE_KEY_PASSWORD')
                 }
             }
 
-            if (keystoreFile != null) {
-                storeFile file(keystoreFile)
-                storePassword keystorePassword
-                keyAlias keyAlias
-                keyPassword keyPassword
+            if (kFile != null) {
+                storeFile file(kFile)
+                storePassword kStorePassword
+                keyAlias kKeyAlias
+                keyPassword kKeyPassword
             }
         }
     }
